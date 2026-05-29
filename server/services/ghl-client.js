@@ -8,14 +8,6 @@ export class GHLClient {
   /**
    * Exchange an OAuth code for access + refresh tokens.
    */
-  _authHeaders() {
-    const basic = Buffer.from(`${process.env.GHL_CLIENT_ID}:${process.env.GHL_CLIENT_SECRET}`).toString('base64');
-    return {
-      'Content-Type':  'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${basic}`,
-    };
-  }
-
   async exchangeCode(code) {
     const { data } = await axios.post(GHL_TOKEN_URL, new URLSearchParams({
       client_id:     process.env.GHL_CLIENT_ID,
@@ -23,7 +15,7 @@ export class GHLClient {
       grant_type:    'authorization_code',
       code,
       redirect_uri:  process.env.GHL_REDIRECT_URI,
-    }), { headers: this._authHeaders() });
+    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
     return data;
   }
@@ -34,7 +26,7 @@ export class GHLClient {
       client_secret: process.env.GHL_CLIENT_SECRET,
       grant_type:    'refresh_token',
       refresh_token: refreshToken,
-    }), { headers: this._authHeaders() });
+    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
 
     const expiresAt = new Date(Date.now() + data.expires_in * 1000);
     await supabase.from('ghl_locations').update({

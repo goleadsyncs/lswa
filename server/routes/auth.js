@@ -20,7 +20,14 @@ router.get('/callback', async (req, res) => {
   if (!code) return res.status(400).send('Missing code');
 
   try {
-    const tokens = await ghlClient.exchangeCode(code);
+    let tokens;
+    try {
+      tokens = await ghlClient.exchangeCode(code);
+    } catch (exchangeErr) {
+      const detail = exchangeErr?.response?.data || exchangeErr.message;
+      console.error('Token exchange failed:', JSON.stringify(detail));
+      return res.status(500).send(`Token exchange failed: ${JSON.stringify(detail)}`);
+    }
 
     // Upsert user by GHL user id
     const { data: user } = await supabase
