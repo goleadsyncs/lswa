@@ -5,69 +5,63 @@ import { waManager, logger } from '../lib/instances.js';
 
 const router = Router();
 
-// ----------------------------------------------------------------
-// Verify GHL webhook signature (HMAC-SHA256)
-// ----------------------------------------------------------------
 function verifySignature(req) {
   const secret = process.env.GHL_WEBHOOK_SECRET;
-  if (!secret) return true; // skip verification in dev if not set
-
+  if (!secret) return true;
   const sig = req.headers['x-ghl-signature'] || req.headers['x-webhook-signature'] || '';
   const body = JSON.stringify(req.body);
-  const expected = crypto
-    .createHmac('sha256', secret)
-    .update(body)
-    .digest('hex');
-
-  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  const expected = crypto.createHmac('sha256', secret).update(body).digest('hex');
+  try { return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)); }
+  catch { return false; }
 }
 
 // ----------------------------------------------------------------
-// POST /api/ghl/webhook/outbound
-//
-// GHL calls this when a sub-account sends an SMS to a contact.
-// We intercept it and deliver via WhatsApp instead.
-//
-// GHL Custom Provider outbound payload (verify against your app config):
-// {
-//   type: "OutboundMessage",
-//   locationId: "...",
-//   message: {
-//     type: "SMS",
-//     from: "+11234567890",   <- the GHL number
-//     to:   "+10987654321",   <- the contact number
-//     body: "Hello!",
-//     conversationId: "...",
-//     messageId: "..."
-//   }
-// }
+// POST /api/events
+// Single endpoint for all GHL webhook events.
+// Routes by payload type: OutboundMessage, InboundMessage, etc.
 // ----------------------------------------------------------------
-router.post('/webhook/outbound', async (req, res) => {
-  // Always ACK quickly so GHL doesn't time out
+router.post('/', async (req, res) => {
   res.json({ status: 'accepted' });
 
   if (!verifySignature(req)) {
-    logger.warn('GHL webhook signature mismatch — ignoring');
+    logger.warn('Webhook signature mismatch - ignoring');
     return;
   }
 
   const payload = req.body;
-  logger.debug({ payload }, 'GHL outbound webhook received');
+  const type = payload.type || payload.event;
 
-  // Normalise across possible payload shapes
-  const locationId  = payload.locationId || payload.location_id;
-  const fromPhone   = payload.message?.from || payload.from;
-  const toPhone     = payload.message?.to   || payload.to;
-  const body        = payload.message?.body || payload.message?.text || payload.body || payload.text || '';
-  const ghlMsgId    = payload.message?.messageId || payload.messageId || null;
+  logger.debug({ type, payload }, 'Webhook received');
+
+  switch (type) {
+    case 'OutboundMessage':
+      await handleOutbound(payload);
+      break;
+    case 'InboundMessage':
+      logger.info({ payload }, 'Inbound message event received');
+      break;
+    case 'ContactCreate':
+    case 'ContactUpdate':
+      logger.info({ type, contactId: payload.id }, 'Contact event');
+      break;
+    default:
+      logger.debug({ type }, 'Unhandled webhook event type');
+  }
+});
+
+async function handleOutbound(payload) {
+  const locationId = payload.locationId || payload.location_id;
+  const fromPhone  = payload.message?.from || payload.from;
+  const toPhone    = payload.message?.to   || payload.to;
+  const body       = payload.message?.body || payload.message?.text || payload.body || payload.text || '';
+  const ghlMsgId   = payload.message?.messageId || payload.messageId || null;
 
   if (!locationId || !fromPhone || !toPhone || !body) {
-    logger.warn({ payload }, 'GHL webhook missing required fields');
+    logger.warn({ payload }, 'OutboundMessage missing required fields');
     return;
   }
 
   try {
-    // Find which WhatsApp session to use for this GHL location + from number
     const { data: mapping } = await supabase
       .from('wa_number_mappings')
       .select('session_id, ghl_locations!inner(id)')
@@ -76,7 +70,7 @@ router.post('/webhook/outbound', async (req, res) => {
       .single();
 
     if (!mapping?.session_id) {
-      logger.warn({ locationId, fromPhone }, 'No WA session mapped for this GHL number');
+      logger.warn({ locationId, fromPhone }, 'No WhatsApp session mapped for this number');
       return;
     }
 
@@ -94,29 +88,19 @@ router.post('/webhook/outbound', async (req, res) => {
       wa_message_id:  waMessageId,
     });
 
-    logger.info({ sessionId: mapping.session_id, to: toPhone }, 'WA message sent');
+    logger.info({ sessionId: mapping.session_id, to: toPhone }, 'WhatsApp message sent');
   } catch (err) {
-    logger.error({ err: err.message, locationId, fromPhone, toPhone }, 'Failed to send WA message');
-
+    logger.error({ err: err.message, locationId, fromPhone, toPhone }, 'Failed to send WhatsApp message');
     await supabase.from('message_logs').insert({
-      direction:  'outbound',
-      from_number: fromPhone,
-      to_number:  toPhone,
+      direction:      'outbound',
+      from_number:    fromPhone,
+      to_number:      toPhone,
       body,
-      status:     'failed',
+      status:         'failed',
       ghl_message_id: ghlMsgId,
-      error:      err.message,
+      error:          err.message,
     });
   }
-});
-
-// ----------------------------------------------------------------
-// POST /api/ghl/webhook/install
-// Called when a GHL sub-account installs/uninstalls the LSWA app
-// ----------------------------------------------------------------
-router.post('/webhook/install', async (req, res) => {
-  logger.info({ body: req.body }, 'GHL install webhook');
-  res.json({ ok: true });
-});
+}
 
 export default router;

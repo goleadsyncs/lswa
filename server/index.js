@@ -19,7 +19,7 @@ app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 app.use('/api/auth',     authRoutes);
-app.use('/api/ghl',      webhookRoutes);
+app.use('/api/events',   webhookRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/billing',  billingRoutes);
 
