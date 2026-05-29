@@ -29,48 +29,86 @@ router.get('/callback', async (req, res) => {
       return res.status(500).send(`Token exchange failed: ${JSON.stringify(detail)}`);
     }
 
-    console.log('GHL token response keys:', Object.keys(tokens));
-
-    // GHL v2 uses different field names — handle all variants
-    const ghlUserId   = tokens.userId   || tokens.user_id   || tokens.companyId || tokens.sub || 'unknown';
-    const ghlLocId    = tokens.locationId || tokens.location_id || locationId || req.query.location_id;
-    const userEmail   = tokens.email    || `${ghlUserId}@ghl.user`;
-
-    if (!ghlLocId) {
-      console.error('No locationId in token response or query params. Token keys:', Object.keys(tokens));
-      return res.status(500).send(`No location ID found. GHL returned: ${JSON.stringify(tokens)}`);
-    }
+    const ghlUserId = tokens.userId || tokens.user_id || tokens.companyId || 'unknown';
+    const companyId = tokens.companyId;
+    const isCompanyInstall = tokens.userType === 'Company' || (companyId && !tokens.locationId);
+    const expiresAt = new Date(Date.now() + (tokens.expires_in || 86400) * 1000);
 
     // Upsert user
     const { data: user } = await supabase
       .from('users')
       .upsert(
-        { ghl_user_id: ghlUserId, email: userEmail },
+        { ghl_user_id: ghlUserId, email: tokens.email || `${ghlUserId}@ghl.user` },
         { onConflict: 'ghl_user_id', ignoreDuplicates: false }
       )
       .select()
       .single();
 
-    // Upsert location
-    const expiresAt = new Date(Date.now() + (tokens.expires_in || 86400) * 1000);
-    await supabase.from('ghl_locations').upsert({
-      user_id:          user.id,
-      ghl_location_id:  ghlLocId,
-      access_token:     tokens.access_token,
-      refresh_token:    tokens.refresh_token,
-      token_expires_at: expiresAt.toISOString(),
-      is_active:        true,
-      updated_at:       new Date().toISOString(),
-    }, { onConflict: 'ghl_location_id' });
+    if (isCompanyInstall && companyId) {
+      // Agency-level install — fetch and store all sub-account locations
+      try {
+        const locations = await ghlClient.getCompanyLocations(tokens.access_token, companyId);
+        console.log(`Company install: found ${locations.length} locations`);
 
-    // Fetch location name (non-critical)
-    try {
-      const locData = await ghlClient.getLocation(tokens.access_token, ghlLocId);
-      const locName = locData?.location?.name || locData?.name;
-      if (locName) {
-        await supabase.from('ghl_locations').update({ name: locName }).eq('ghl_location_id', ghlLocId);
+        for (const loc of locations) {
+          await supabase.from('ghl_locations').upsert({
+            user_id:          user.id,
+            ghl_location_id:  loc.id,
+            name:             loc.name,
+            access_token:     tokens.access_token,
+            refresh_token:    tokens.refresh_token,
+            token_expires_at: expiresAt.toISOString(),
+            is_active:        true,
+            updated_at:       new Date().toISOString(),
+          }, { onConflict: 'ghl_location_id' });
+        }
+
+        if (locations.length === 0) {
+          // No locations found — store company as fallback
+          await supabase.from('ghl_locations').upsert({
+            user_id:          user.id,
+            ghl_location_id:  companyId,
+            name:             'Agency Account',
+            access_token:     tokens.access_token,
+            refresh_token:    tokens.refresh_token,
+            token_expires_at: expiresAt.toISOString(),
+            is_active:        true,
+            updated_at:       new Date().toISOString(),
+          }, { onConflict: 'ghl_location_id' });
+        }
+      } catch (locErr) {
+        console.error('Failed to fetch company locations:', locErr.message);
+        // Store company as fallback
+        await supabase.from('ghl_locations').upsert({
+          user_id:          user.id,
+          ghl_location_id:  companyId,
+          name:             'Agency Account',
+          access_token:     tokens.access_token,
+          refresh_token:    tokens.refresh_token,
+          token_expires_at: expiresAt.toISOString(),
+          is_active:        true,
+          updated_at:       new Date().toISOString(),
+        }, { onConflict: 'ghl_location_id' });
       }
-    } catch { /* non-critical */ }
+    } else {
+      // Location-level install
+      const ghlLocId = tokens.locationId || tokens.location_id || locationId;
+      await supabase.from('ghl_locations').upsert({
+        user_id:          user.id,
+        ghl_location_id:  ghlLocId,
+        access_token:     tokens.access_token,
+        refresh_token:    tokens.refresh_token,
+        token_expires_at: expiresAt.toISOString(),
+        is_active:        true,
+        updated_at:       new Date().toISOString(),
+      }, { onConflict: 'ghl_location_id' });
+
+      try {
+        const locData = await ghlClient.getLocation(tokens.access_token, ghlLocId);
+        const locName = locData?.location?.name || locData?.name;
+        if (locName) await supabase.from('ghl_locations').update({ name: locName }).eq('ghl_location_id', ghlLocId);
+      } catch { /* non-critical */ }
+    }
 
     const jwt = issueToken(user.id);
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';

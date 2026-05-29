@@ -63,6 +63,17 @@ export class GHLClient {
   }
 
   /**
+   * Get all locations under a company (agency-level install).
+   */
+  async getCompanyLocations(accessToken, companyId) {
+    const { data } = await axios.get(`${GHL_BASE}/locations/search`, {
+      headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-07-28' },
+      params: { companyId, limit: 100 },
+    });
+    return data?.locations || [];
+  }
+
+  /**
    * Look up a GHL contact by phone number within a location.
    */
   async findContactByPhone(accessToken, locationId, phone) {
