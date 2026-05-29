@@ -40,6 +40,7 @@ export default function Landing() {
 
       {/* Hero */}
       <section style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
+        <img src="/lswa_logo.png" alt="LSWA" style={{ height: 80, width: 'auto', objectFit: 'contain', marginBottom: 28 }} />
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--wa-glass)', border: '1px solid var(--wa-border)', color: 'var(--wa)', padding: '6px 16px', borderRadius: 'var(--r-full)', fontSize: 13, fontWeight: 500, marginBottom: 32, letterSpacing: '-0.01em' }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--wa)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
           Now live - GHL Telephony Provider integration
