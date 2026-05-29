@@ -57,7 +57,7 @@ export default function Dashboard() {
       {/* Header */}
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4, 3, 14, 0.8)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>💬</div>
+          <img src="/lswa_logo.png" alt="LSWA" style={{ height: 30, width: 30, objectFit: "contain" }} />
           <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

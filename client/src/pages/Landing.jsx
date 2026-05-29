@@ -24,7 +24,7 @@ export default function Landing() {
       {/* Nav */}
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 48px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4, 3, 14, 0.7)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, boxShadow: 'var(--glow-wa)' }}>💬</div>
+          <img src="/lswa_logo.png" alt="LSWA" style={{ height: 34, width: 34, objectFit: "contain" }} />
           <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 18, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -145,7 +145,7 @@ export default function Landing() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--border)', padding: '32px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>💬</div>
+          <img src="/lswa_logo.png" alt="LSWA" style={{ height: 28, width: 28, objectFit: "contain" }} />
           <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15 }}>LSWA</span>
         </div>
         <div style={{ color: 'var(--muted)', fontSize: 13 }}>© {new Date().getFullYear()} LeadSync. All rights reserved.</div>
