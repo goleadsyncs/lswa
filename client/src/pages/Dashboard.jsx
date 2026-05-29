@@ -88,13 +88,13 @@ export default function Dashboard() {
             <div style={{ fontSize: 52, marginBottom: 18 }}>�-</div>
             <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Connect your first GHL account</h2>
             <p style={{ color: 'var(--muted)', fontSize: 15, marginBottom: 28 }}>Link a GHL sub-account to start routing messages via WhatsApp.</p>
-            <a href="/api/auth/ghl" className="btn-wa" style={{ padding: '13px 32px', fontSize: 15 }}>Connect GHL account</a>
+            <a href="/api/auth/connect" className="btn-wa" style={{ padding: '13px 32px', fontSize: 15 }}>Connect GHL account</a>
           </div>
         ) : (
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
               <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 600, color: 'var(--text-2)' }}>GHL Sub-accounts <span style={{ color: 'var(--muted)', fontWeight: 400 }}>({locations.length})</span></h2>
-              <a href="/api/auth/ghl" className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}>+ Add account</a>
+              <a href="/api/auth/connect" className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}>+ Add account</a>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>

@@ -31,8 +31,8 @@ export default function Landing() {
           {isLoggedIn
             ? <a href="/dashboard" className="btn-primary">Dashboard</a>
             : <>
-                <a href="/api/auth/ghl" className="btn-ghost">Sign in with GHL</a>
-                <a href="/api/auth/ghl" className="btn-wa">Start free trial</a>
+                <a href="/api/auth/connect" className="btn-ghost">Sign in with GHL</a>
+                <a href="/api/auth/connect" className="btn-wa">Start free trial</a>
               </>
           }
         </div>
@@ -56,7 +56,7 @@ export default function Landing() {
         </p>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <a href="/api/auth/ghl" className="btn-wa" style={{ padding: '14px 36px', fontSize: 15 }}>
+          <a href="/api/auth/connect" className="btn-wa" style={{ padding: '14px 36px', fontSize: 15 }}>
             Connect GHL - 14 days free
           </a>
           <a href="#pricing" className="btn-ghost" style={{ padding: '14px 36px', fontSize: 15 }}>
@@ -135,7 +135,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <a href="/api/auth/ghl" className={p.popular ? 'btn-wa' : 'btn-ghost'} style={{ display: 'block', textAlign: 'center', padding: '12px 20px' }}>
+              <a href="/api/auth/connect" className={p.popular ? 'btn-wa' : 'btn-ghost'} style={{ display: 'block', textAlign: 'center', padding: '12px 20px' }}>
                 Start free trial
               </a>
             </div>

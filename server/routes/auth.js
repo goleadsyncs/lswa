@@ -6,16 +6,16 @@ import { ghlClient } from '../lib/instances.js';
 const router = Router();
 
 // ----------------------------------------------------------------
-// GET /api/auth/ghl  — redirect user to GHL OAuth consent screen
+// GET /api/auth/connect  — redirect user to OAuth consent screen
 // ----------------------------------------------------------------
-router.get('/ghl', (_req, res) => {
+router.get('/connect', (_req, res) => {
   res.redirect(ghlClient.getAuthUrl());
 });
 
 // ----------------------------------------------------------------
-// GET /api/auth/ghl/callback  — GHL redirects here after consent
+// GET /api/auth/callback  — redirected here after consent
 // ----------------------------------------------------------------
-router.get('/ghl/callback', async (req, res) => {
+router.get('/callback', async (req, res) => {
   const { code, locationId } = req.query;
   if (!code) return res.status(400).send('Missing code');
 
