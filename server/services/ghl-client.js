@@ -131,16 +131,28 @@ export class GHLClient {
     const digits = fromPhone.replace(/\D/g, '');
     const normalized = digits.startsWith('0') ? `+27${digits.slice(1)}` : `+${digits}`;
 
+    // Resolve contact — create if not yet in GHL
+    let contact = await this.findContactByPhone(accessToken, locationId, normalized);
+    if (!contact) {
+      const { data } = await axios.post(
+        `${GHL_BASE}/contacts/`,
+        { locationId, phone: normalized },
+        { headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-07-28', 'Content-Type': 'application/json' } }
+      );
+      contact = data?.contact || data;
+    }
+
+    if (!contact?.id) throw new Error(`Could not resolve contact for ${normalized}`);
+
     await axios.post(
       `${GHL_BASE}/conversations/messages/inbound`,
-      { type: 'SMS', phone: normalized, message },
+      { type: 'SMS', contactId: contact.id, message, locationId },
       {
         headers: {
           Authorization:  `Bearer ${accessToken}`,
           Version:        '2021-04-15',
           'Content-Type': 'application/json',
         },
-        params: { locationId },
       }
     );
   }
