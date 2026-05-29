@@ -8,6 +8,14 @@ export class GHLClient {
   /**
    * Exchange an OAuth code for access + refresh tokens.
    */
+  _authHeaders() {
+    const basic = Buffer.from(`${process.env.GHL_CLIENT_ID}:${process.env.GHL_CLIENT_SECRET}`).toString('base64');
+    return {
+      'Content-Type':  'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${basic}`,
+    };
+  }
+
   async exchangeCode(code) {
     const { data } = await axios.post(GHL_TOKEN_URL, new URLSearchParams({
       client_id:     process.env.GHL_CLIENT_ID,
@@ -15,21 +23,18 @@ export class GHLClient {
       grant_type:    'authorization_code',
       code,
       redirect_uri:  process.env.GHL_REDIRECT_URI,
-    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    }), { headers: this._authHeaders() });
 
-    return data; // { access_token, refresh_token, expires_in, locationId, userId, ... }
+    return data;
   }
 
-  /**
-   * Refresh an expired access token. Updates DB record in place.
-   */
   async refreshToken(locationDbId, refreshToken) {
     const { data } = await axios.post(GHL_TOKEN_URL, new URLSearchParams({
       client_id:     process.env.GHL_CLIENT_ID,
       client_secret: process.env.GHL_CLIENT_SECRET,
       grant_type:    'refresh_token',
       refresh_token: refreshToken,
-    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    }), { headers: this._authHeaders() });
 
     const expiresAt = new Date(Date.now() + data.expires_in * 1000);
     await supabase.from('ghl_locations').update({
