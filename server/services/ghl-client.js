@@ -118,11 +118,15 @@ export class GHLClient {
       'locations.readonly',
     ].join(' ');
 
+    const clientId  = process.env.GHL_CLIENT_ID; // e.g. 6a197451508d954be48f732c-mpqtubjl
+    const versionId = clientId.split('-')[0];     // e.g. 6a197451508d954be48f732c
+
     const params = new URLSearchParams({
       response_type: 'code',
       redirect_uri:  process.env.GHL_REDIRECT_URI,
+      client_id:     clientId,
       scope:         scopes,
-      version_id:    process.env.GHL_CLIENT_ID,
+      version_id:    versionId,
     });
 
     return `https://marketplace.gohighlevel.com/v2/oauth/chooselocation?${params}`;
