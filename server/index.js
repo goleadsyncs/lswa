@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import webhookRoutes from './routes/webhook.js';
 import whatsappRoutes from './routes/whatsapp.js';
 import billingRoutes from './routes/billing.js';
+import workflowRoutes from './routes/workflow.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const clientDist = join(__dirname, '..', 'client', 'dist');
@@ -28,6 +29,7 @@ app.use('/api/auth',     authRoutes);
 app.use('/api/events',   webhookRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/billing',  billingRoutes);
+app.use('/api/workflow', workflowRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
 
