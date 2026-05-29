@@ -74,6 +74,35 @@ export class GHLClient {
   }
 
   /**
+   * Exchange a company-level token for a location-specific token.
+   * Required for location-level API calls (contacts, conversations, etc.)
+   */
+  async getLocationToken(companyToken, locationId) {
+    const { data } = await axios.post(
+      `${GHL_BASE}/oauth/locationToken`,
+      new URLSearchParams({ companyId: '', locationId }),
+      {
+        headers: {
+          Authorization:  `Bearer ${companyToken}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Version:        '2021-07-28',
+        },
+      }
+    );
+    return data?.access_token || data?.token;
+  }
+
+  /**
+   * Get a contact by ID using a location token.
+   */
+  async getContact(accessToken, contactId) {
+    const { data } = await axios.get(`${GHL_BASE}/contacts/${contactId}`, {
+      headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-07-28' },
+    });
+    return data?.contact || data;
+  }
+
+  /**
    * Look up a GHL contact by phone number within a location.
    */
   async findContactByPhone(accessToken, locationId, phone) {

@@ -82,15 +82,11 @@ async function handleOutbound(payload) {
     if (!toPhone && contactId) {
       try {
         const { ghlClient } = await import('../lib/instances.js');
-        const token = await ghlClient.ensureFreshToken(loc);
-        const contact = await ghlClient.findContactByPhone(token, locationId, '');
-        // fetch contact directly by ID
-        const axios = (await import('axios')).default;
-        const { data: contactData } = await axios.get(
-          `https://services.leadconnectorhq.com/contacts/${contactId}`,
-          { headers: { Authorization: `Bearer ${token}`, Version: '2021-07-28' } }
-        );
-        toPhone = contactData?.contact?.phone || contactData?.phone;
+        const companyToken = await ghlClient.ensureFreshToken(loc);
+        // Exchange company token for location-specific token
+        const locToken = await ghlClient.getLocationToken(companyToken, locationId);
+        const contact  = await ghlClient.getContact(locToken || companyToken, contactId);
+        toPhone = contact?.phone;
       } catch (err) {
         logger.error({ err: err.message, contactId }, 'Failed to fetch contact phone');
         return;
