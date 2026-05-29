@@ -130,23 +130,31 @@ export class GHLClient {
   async injectInbound({ accessToken, locationId, fromPhone, message }) {
     const digits = fromPhone.replace(/\D/g, '');
     const normalized = digits.startsWith('0') ? `+27${digits.slice(1)}` : `+${digits}`;
+    console.log('[injectInbound] step 1 - findContactByPhone', normalized);
 
     // Resolve contact — create if not yet in GHL
     let contact = await this.findContactByPhone(accessToken, locationId, normalized);
+    console.log('[injectInbound] step 1 result', contact?.id);
+
     if (!contact) {
+      console.log('[injectInbound] step 2 - creating contact');
       const { data } = await axios.post(
         `${GHL_BASE}/contacts/`,
         { locationId, phone: normalized },
         { headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-07-28', 'Content-Type': 'application/json' } }
       );
       contact = data?.contact || data;
+      console.log('[injectInbound] step 2 result', contact?.id);
     }
 
     if (!contact?.id) throw new Error(`Could not resolve contact for ${normalized}`);
 
-    await axios.post(
+    const body = { type: 'SMS', contactId: contact.id, message, locationId };
+    console.log('[injectInbound] step 3 - posting inbound message', JSON.stringify(body));
+
+    const resp = await axios.post(
       `${GHL_BASE}/conversations/messages/inbound`,
-      { type: 'SMS', contactId: contact.id, message, locationId },
+      body,
       {
         headers: {
           Authorization:  `Bearer ${accessToken}`,
@@ -155,6 +163,7 @@ export class GHLClient {
         },
       }
     );
+    console.log('[injectInbound] step 3 result', resp.status, JSON.stringify(resp.data));
   }
 
   /**
