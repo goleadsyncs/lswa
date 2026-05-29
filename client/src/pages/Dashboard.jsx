@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App.jsx';
 import api from '../api.js';
@@ -77,7 +77,7 @@ export default function Dashboard() {
         {/* Trial banner */}
         {subscription?.status === 'trialing' && (
           <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.22)', borderRadius: 'var(--r-md)', padding: '14px 20px', marginBottom: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <span style={{ fontSize: 14 }}>🎉 Free trial — expires <strong>{new Date(subscription.trial_ends_at).toLocaleDateString()}</strong></span>
+            <span style={{ fontSize: 14 }}>🎉 Free trial - expires <strong>{new Date(subscription.trial_ends_at).toLocaleDateString()}</strong></span>
             <button className="btn-primary" style={{ padding: '8px 18px', fontSize: 13 }} onClick={() => nav('/billing')}>Upgrade plan</button>
           </div>
         )}
@@ -85,7 +85,7 @@ export default function Dashboard() {
         {locations.length === 0 ? (
           /* Empty state */
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-            <div style={{ fontSize: 52, marginBottom: 18 }}>🔗</div>
+            <div style={{ fontSize: 52, marginBottom: 18 }}>�-</div>
             <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Connect your first GHL account</h2>
             <p style={{ color: 'var(--muted)', fontSize: 15, marginBottom: 28 }}>Link a GHL sub-account to start routing messages via WhatsApp.</p>
             <a href="/api/auth/ghl" className="btn-wa" style={{ padding: '13px 32px', fontSize: 15 }}>Connect GHL account</a>

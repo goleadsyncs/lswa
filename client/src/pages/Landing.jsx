@@ -1,12 +1,12 @@
-import React from 'react';
+﻿import React from 'react';
 
 const features = [
   { icon: '💬', title: 'GHL thinks it\'s SMS', text: 'Drop LSWA in as your Telephony Provider. Every outbound message your team sends is secretly WhatsApp. No workflow changes.' },
-  { icon: '📱', title: 'Scan & go in 60s', text: 'Connect any WhatsApp number by scanning a QR code — exactly like WhatsApp Web. No Meta approval, no API keys, no waiting.' },
-  { icon: '🔄', title: 'Two-way conversations', text: 'Replies land straight back in GHL\'s Conversations tab. Your team sees a normal inbox — they\'ll never know it\'s WhatsApp.' },
-  { icon: '🗺️', title: 'Multi-number routing', text: 'Map different GHL phone numbers to different WhatsApp accounts. Run multiple brands from one dashboard.' },
+  { icon: '📱', title: 'Scan & go in 60s', text: 'Connect any WhatsApp number by scanning a QR code - exactly like WhatsApp Web. No Meta approval, no API keys, no waiting.' },
+  { icon: '🔄', title: 'Two-way conversations', text: 'Replies land straight back in GHL\'s Conversations tab. Your team sees a normal inbox - they\'ll never know it\'s WhatsApp.' },
+  { icon: '�-�️', title: 'Multi-number routing', text: 'Map different GHL phone numbers to different WhatsApp accounts. Run multiple brands from one dashboard.' },
   { icon: '📊', title: 'Full message logs', text: 'Every outbound and inbound message logged with status, timestamps, and error details per sub-account.' },
-  { icon: '♾️', title: 'Unlimited messages', text: 'Flat monthly rate. No per-message fees — ever. Scale to thousands of contacts without watching a meter.' },
+  { icon: '♾️', title: 'Unlimited messages', text: 'Flat monthly rate. No per-message fees - ever. Scale to thousands of contacts without watching a meter.' },
 ];
 
 const plans = [
@@ -42,11 +42,11 @@ export default function Landing() {
       <section style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 24px 80px', textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--wa-glass)', border: '1px solid var(--wa-border)', color: 'var(--wa)', padding: '6px 16px', borderRadius: 'var(--r-full)', fontSize: 13, fontWeight: 500, marginBottom: 32, letterSpacing: '-0.01em' }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--wa)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-          Now live — GHL Telephony Provider integration
+          Now live - GHL Telephony Provider integration
         </div>
 
         <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 800, lineHeight: 1.05, maxWidth: 820, marginBottom: 24, letterSpacing: '-0.03em' }}>
-          Send WhatsApp from GHL —{' '}
+          Send WhatsApp from GHL -{' '}
           <span className="wa-text">looks like SMS_</span>
         </h1>
 
@@ -56,7 +56,7 @@ export default function Landing() {
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           <a href="/api/auth/ghl" className="btn-wa" style={{ padding: '14px 36px', fontSize: 15 }}>
-            Connect GHL — 14 days free
+            Connect GHL - 14 days free
           </a>
           <a href="#pricing" className="btn-ghost" style={{ padding: '14px 36px', fontSize: 15 }}>
             See pricing
@@ -98,7 +98,7 @@ export default function Landing() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
             { n: '01', title: 'Connect your GHL account', desc: 'OAuth in one click. LSWA registers as a Telephony Provider inside your GHL instance.' },
-            { n: '02', title: 'Scan a WhatsApp QR code', desc: 'Link any WhatsApp number by scanning a QR — the same way you\'d use WhatsApp Web.' },
+            { n: '02', title: 'Scan a WhatsApp QR code', desc: 'Link any WhatsApp number by scanning a QR - the same way you\'d use WhatsApp Web.' },
             { n: '03', title: 'Messages route automatically', desc: 'GHL sends SMS → LSWA intercepts → WhatsApp delivered. Replies come back into GHL.' },
           ].map(s => (
             <div key={s.n} className="glass-card" style={{ padding: '24px 28px', display: 'flex', alignItems: 'flex-start', gap: 20 }}>
