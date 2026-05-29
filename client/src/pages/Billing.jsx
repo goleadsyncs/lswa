@@ -3,150 +3,109 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App.jsx';
 import api from '../api.js';
 
-const s = {
-  page: { minHeight: '100vh' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 32px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' },
-  logo: { display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 18, cursor: 'pointer' },
-  logoIcon: { width: 32, height: 32, background: 'var(--green)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 },
-  body: { maxWidth: 800, margin: '0 auto', padding: '40px 24px' },
-  pageTitle: { fontSize: 24, fontWeight: 700, marginBottom: 4 },
-  pageSub: { color: 'var(--muted)', fontSize: 14, marginBottom: 40 },
-  card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 28, marginBottom: 20 },
-  cardTitle: { fontSize: 16, fontWeight: 600, marginBottom: 16 },
-  row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' },
-  rowLast: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' },
-  label: { color: 'var(--muted)', fontSize: 14 },
-  value: { fontSize: 14, fontWeight: 500 },
-  badgeGreen: { background: 'rgba(37,211,102,0.15)', color: 'var(--green)', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 500 },
-  badgeOrange: { background: 'rgba(210,153,34,0.15)', color: 'var(--warning)', padding: '3px 10px', borderRadius: 999, fontSize: 12 },
-  badgeRed: { background: 'rgba(248,81,73,0.15)', color: 'var(--danger)', padding: '3px 10px', borderRadius: 999, fontSize: 12 },
-  btnPrimary: { padding: '10px 22px', background: 'var(--green)', color: '#000', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  btnSm: { padding: '8px 16px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 500 },
-  priceGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 },
-  planCard: { border: '1px solid var(--border)', borderRadius: 10, padding: 20, cursor: 'pointer', transition: 'border-color 0.15s' },
-  planCardActive: { border: '2px solid var(--green)' },
-  planName: { fontWeight: 600, marginBottom: 4 },
-  planPrice: { fontSize: 24, fontWeight: 800, color: 'var(--green)', marginBottom: 4 },
-  planDesc: { fontSize: 12, color: 'var(--muted)' },
-};
-
 const PLANS = [
-  { id: 'starter', name: 'Starter', price: '$29/mo', desc: '1 account, 3 numbers' },
-  { id: 'growth',  name: 'Growth',  price: '$49/mo', desc: '5 accounts, 15 numbers' },
-  { id: 'agency',  name: 'Agency',  price: '$99/mo', desc: 'Unlimited everything' },
+  { id: 'starter', name: 'Starter', price: '$29', desc: '1 account · 3 numbers' },
+  { id: 'growth',  name: 'Growth',  price: '$49', desc: '5 accounts · 15 numbers' },
+  { id: 'agency',  name: 'Agency',  price: '$99', desc: 'Unlimited everything' },
 ];
 
-function statusBadge(status) {
-  if (status === 'active')   return <span style={s.badgeGreen}>Active</span>;
-  if (status === 'trialing') return <span style={s.badgeOrange}>Trial</span>;
-  return <span style={s.badgeRed}>{status}</span>;
-}
-
 export default function Billing() {
-  const { user, subscription } = useContext(AuthContext);
+  const { subscription } = useContext(AuthContext);
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(subscription?.plan || 'growth');
+  const [selected, setSelected] = useState(subscription?.plan || 'growth');
   const [flash, setFlash] = useState(null);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.searchParams.get('success')) setFlash({ type: 'success', msg: 'Subscription activated!' });
-    if (url.searchParams.get('cancelled')) setFlash({ type: 'warn', msg: 'Checkout cancelled.' });
+    const p = new URL(window.location.href).searchParams;
+    if (p.get('success'))   setFlash({ ok: true,  msg: '🎉 Subscription activated!' });
+    if (p.get('cancelled')) setFlash({ ok: false, msg: 'Checkout cancelled.' });
   }, []);
 
   const startCheckout = async () => {
     setLoading(true);
-    try {
-      const { data } = await api.post('/billing/checkout', { plan: selectedPlan });
-      window.location.href = data.url;
-    } catch { setLoading(false); }
+    try { const { data } = await api.post('/billing/checkout', { plan: selected }); window.location.href = data.url; }
+    catch { setLoading(false); }
   };
 
   const openPortal = async () => {
     setLoading(true);
-    try {
-      const { data } = await api.post('/billing/portal');
-      window.location.href = data.url;
-    } catch { setLoading(false); }
+    try { const { data } = await api.post('/billing/portal'); window.location.href = data.url; }
+    catch { setLoading(false); }
   };
 
   const isActive = ['active', 'trialing'].includes(subscription?.status);
 
+  const statusCfg = {
+    active:   { bg: 'var(--wa-glass)',              border: 'var(--wa-border)',             color: 'var(--wa)',      label: 'Active' },
+    trialing: { bg: 'rgba(251,191,36,0.1)',          border: 'rgba(251,191,36,0.25)',        color: 'var(--warning)', label: 'Trial' },
+    past_due: { bg: 'rgba(248,113,113,0.1)',         border: 'rgba(248,113,113,0.25)',       color: 'var(--danger)',  label: 'Past due' },
+    cancelled:{ bg: 'rgba(148,163,184,0.07)',        border: 'rgba(148,163,184,0.15)',       color: 'var(--muted)',   label: 'Cancelled' },
+  };
+  const sc = statusCfg[subscription?.status] || statusCfg.cancelled;
+
   return (
-    <div style={s.page}>
-      <header style={s.header}>
-        <div style={s.logo} onClick={() => nav('/dashboard')}>
-          <div style={s.logoIcon}>🟢</div>
-          LSWA
+    <div style={{ minHeight: '100vh' }}>
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4,3,14,0.8)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => nav('/dashboard')}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>💬</div>
+          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
-        <button style={s.btnSm} onClick={() => nav('/dashboard')}>← Dashboard</button>
+        <button className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }} onClick={() => nav('/dashboard')}>← Dashboard</button>
       </header>
 
-      <div style={s.body}>
-        <div style={s.pageTitle}>Billing</div>
-        <div style={s.pageSub}>Manage your LSWA subscription</div>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px', animation: 'fadeIn 0.3s ease-out' }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Billing</h1>
+        <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 32 }}>Manage your LSWA subscription</p>
 
         {flash && (
-          <div style={{ background: flash.type === 'success' ? 'rgba(37,211,102,0.1)' : 'rgba(210,153,34,0.1)', border: `1px solid ${flash.type === 'success' ? 'var(--green)' : 'var(--warning)'}`, borderRadius: 10, padding: '12px 18px', marginBottom: 24, fontSize: 14 }}>
+          <div style={{ background: flash.ok ? 'rgba(37,211,102,0.08)' : 'rgba(251,191,36,0.08)', border: `1px solid ${flash.ok ? 'var(--wa-border)' : 'rgba(251,191,36,0.25)'}`, borderRadius: 'var(--r-md)', padding: '12px 18px', marginBottom: 24, fontSize: 14 }}>
             {flash.msg}
           </div>
         )}
 
         {isActive ? (
-          <div style={s.card}>
-            <div style={s.cardTitle}>Current subscription</div>
-            <div style={s.row}>
-              <div style={s.label}>Plan</div>
-              <div style={s.value}>{subscription.plan?.charAt(0).toUpperCase() + subscription.plan?.slice(1)}</div>
-            </div>
-            <div style={s.row}>
-              <div style={s.label}>Status</div>
-              <div>{statusBadge(subscription.status)}</div>
-            </div>
-            {subscription.trial_ends_at && subscription.status === 'trialing' && (
-              <div style={s.row}>
-                <div style={s.label}>Trial ends</div>
-                <div style={s.value}>{new Date(subscription.trial_ends_at).toLocaleDateString()}</div>
+          <div className="glass-card" style={{ padding: 28, marginBottom: 20 }}>
+            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Current subscription</div>
+            {[
+              ['Plan', subscription.plan?.charAt(0).toUpperCase() + subscription.plan?.slice(1)],
+              ['Status', <span style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color, padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 12, fontWeight: 500 }}>{sc.label}</span>],
+              subscription.trial_ends_at && subscription.status === 'trialing' && ['Trial ends', new Date(subscription.trial_ends_at).toLocaleDateString()],
+              subscription.current_period_ends_at && ['Next billing', new Date(subscription.current_period_ends_at).toLocaleDateString()],
+            ].filter(Boolean).map(([label, val]) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ color: 'var(--muted)', fontSize: 14 }}>{label}</span>
+                <span style={{ fontSize: 14, fontWeight: 500 }}>{val}</span>
               </div>
-            )}
-            {subscription.current_period_ends_at && (
-              <div style={s.row}>
-                <div style={s.label}>Next billing date</div>
-                <div style={s.value}>{new Date(subscription.current_period_ends_at).toLocaleDateString()}</div>
-              </div>
-            )}
-            <div style={{ ...s.rowLast, marginTop: 20 }}>
-              <div style={s.label}>Manage your plan, payment method, and invoices</div>
-              <button style={s.btnPrimary} onClick={openPortal} disabled={loading}>
+            ))}
+            <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn-primary" style={{ padding: '10px 22px', fontSize: 14 }} onClick={openPortal} disabled={loading}>
                 {loading ? 'Loading...' : 'Manage subscription'}
               </button>
             </div>
           </div>
         ) : (
-          <div style={s.card}>
-            <div style={s.cardTitle}>Choose a plan</div>
-            <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 24 }}>Start with a 14-day free trial. No credit card required.</p>
+          <div className="glass-card" style={{ padding: 28 }}>
+            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Choose a plan</div>
+            <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 24 }}>14-day free trial. No credit card required.</p>
 
-            <div style={s.priceGrid}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
               {PLANS.map(p => (
                 <div
                   key={p.id}
-                  style={{ ...s.planCard, ...(selectedPlan === p.id ? s.planCardActive : {}) }}
-                  onClick={() => setSelectedPlan(p.id)}
+                  onClick={() => setSelected(p.id)}
+                  style={{ border: selected === p.id ? '2px solid var(--purple)' : '1px solid var(--border-2)', borderRadius: 'var(--r-md)', padding: '18px 16px', cursor: 'pointer', background: selected === p.id ? 'rgba(139,92,246,0.08)' : 'transparent', transition: 'all 0.15s', boxShadow: selected === p.id ? 'var(--glow)' : 'none' }}
                 >
-                  <div style={s.planName}>{p.name}</div>
-                  <div style={s.planPrice}>{p.price}</div>
-                  <div style={s.planDesc}>{p.desc}</div>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 800, color: 'var(--purple-light)', marginBottom: 4 }}>{p.price}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--muted)' }}>/mo</span></div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{p.desc}</div>
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: 24 }}>
-              <button style={{ ...s.btnPrimary, width: '100%', padding: '14px', fontSize: 15 }} onClick={startCheckout} disabled={loading}>
-                {loading ? 'Loading...' : 'Start 14-day free trial'}
-              </button>
-            </div>
+            <button className="btn-wa" style={{ width: '100%', padding: '14px', fontSize: 15, borderRadius: 'var(--r-md)' }} onClick={startCheckout} disabled={loading}>
+              {loading ? 'Loading...' : 'Start 14-day free trial'}
+            </button>
           </div>
         )}
       </div>
