@@ -55,36 +55,74 @@ router.post('/', async (req, res) => {
 
 async function handleOutbound(payload) {
   const locationId = payload.locationId || payload.location_id;
-  const fromPhone  = payload.message?.from || payload.from;
-  const toPhone    = payload.message?.to   || payload.to;
-  const body       = payload.message?.body || payload.message?.text || payload.body || payload.text || '';
-  const ghlMsgId   = payload.message?.messageId || payload.messageId || null;
+  const contactId  = payload.contactId  || payload.contact_id;
+  const body       = payload.body || payload.message?.body || payload.message?.text || payload.text || '';
+  const ghlMsgId   = payload.messageId || payload.message?.messageId || null;
 
-  if (!locationId || !fromPhone || !toPhone || !body) {
-    logger.warn({ payload }, 'OutboundMessage missing required fields');
+  if (!locationId || !body) {
+    logger.warn({ payload }, 'OutboundMessage missing locationId or body');
     return;
   }
 
   try {
-    const { data: mapping } = await supabase
-      .from('wa_number_mappings')
-      .select('session_id, ghl_locations!inner(id)')
-      .eq('ghl_locations.ghl_location_id', locationId)
-      .eq('ghl_number', fromPhone)
+    // Get the location record + access token
+    const { data: loc } = await supabase
+      .from('ghl_locations')
+      .select('id, access_token, refresh_token, token_expires_at, ghl_location_id')
+      .eq('ghl_location_id', locationId)
       .single();
 
-    if (!mapping?.session_id) {
-      logger.warn({ locationId, fromPhone }, 'No WhatsApp session mapped for this number');
+    if (!loc) {
+      logger.warn({ locationId }, 'Location not found in DB');
       return;
     }
 
-    const waMessageId = await waManager.sendMessage(mapping.session_id, toPhone, body);
+    // Get contact phone number from GHL
+    let toPhone = payload.to || payload.message?.to;
+    if (!toPhone && contactId) {
+      try {
+        const { ghlClient } = await import('../lib/instances.js');
+        const token = await ghlClient.ensureFreshToken(loc);
+        const contact = await ghlClient.findContactByPhone(token, locationId, '');
+        // fetch contact directly by ID
+        const axios = (await import('axios')).default;
+        const { data: contactData } = await axios.get(
+          `https://services.leadconnectorhq.com/contacts/${contactId}`,
+          { headers: { Authorization: `Bearer ${token}`, Version: '2021-07-28' } }
+        );
+        toPhone = contactData?.contact?.phone || contactData?.phone;
+      } catch (err) {
+        logger.error({ err: err.message, contactId }, 'Failed to fetch contact phone');
+        return;
+      }
+    }
+
+    if (!toPhone) {
+      logger.warn({ payload }, 'Could not determine recipient phone number');
+      return;
+    }
+
+    // Find the first connected WA session for this location
+    const { data: session } = await supabase
+      .from('wa_sessions')
+      .select('id')
+      .eq('location_id', loc.id)
+      .eq('status', 'connected')
+      .limit(1)
+      .single();
+
+    if (!session) {
+      logger.warn({ locationId }, 'No connected WhatsApp session for this location');
+      return;
+    }
+
+    const waMessageId = await waManager.sendMessage(session.id, toPhone, body);
 
     await supabase.from('message_logs').insert({
-      location_id:    mapping.ghl_locations.id,
-      session_id:     mapping.session_id,
+      location_id:    loc.id,
+      session_id:     session.id,
       direction:      'outbound',
-      from_number:    fromPhone,
+      from_number:    'LSWA',
       to_number:      toPhone,
       body,
       status:         'sent',
@@ -92,12 +130,11 @@ async function handleOutbound(payload) {
       wa_message_id:  waMessageId,
     });
 
-    logger.info({ sessionId: mapping.session_id, to: toPhone }, 'WhatsApp message sent');
+    logger.info({ sessionId: session.id, to: toPhone }, 'WhatsApp message sent');
   } catch (err) {
-    logger.error({ err: err.message, locationId, fromPhone, toPhone }, 'Failed to send WhatsApp message');
+    logger.error({ err: err.message, locationId, toPhone }, 'Failed to send WhatsApp message');
     await supabase.from('message_logs').insert({
       direction:      'outbound',
-      from_number:    fromPhone,
       to_number:      toPhone,
       body,
       status:         'failed',
