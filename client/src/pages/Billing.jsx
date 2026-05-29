@@ -49,13 +49,13 @@ export default function Billing() {
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4,3,14,0.8)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => nav('/dashboard')}>
           <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>💬</div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
         <button className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }} onClick={() => nav('/dashboard')}>← Dashboard</button>
       </header>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px', animation: 'fadeIn 0.3s ease-out' }}>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Billing</h1>
+        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Billing</h1>
         <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 32 }}>Manage your LSWA subscription</p>
 
         {flash && (
@@ -66,7 +66,7 @@ export default function Billing() {
 
         {isActive ? (
           <div className="glass-card" style={{ padding: 28, marginBottom: 20 }}>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Current subscription</div>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Current subscription</div>
             {[
               ['Plan', subscription.plan?.charAt(0).toUpperCase() + subscription.plan?.slice(1)],
               ['Status', <span style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color, padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 12, fontWeight: 500 }}>{sc.label}</span>],
@@ -86,7 +86,7 @@ export default function Billing() {
           </div>
         ) : (
           <div className="glass-card" style={{ padding: 28 }}>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Choose a plan</div>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Choose a plan</div>
             <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 24 }}>14-day free trial. No credit card required.</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -96,8 +96,8 @@ export default function Billing() {
                   onClick={() => setSelected(p.id)}
                   style={{ border: selected === p.id ? '2px solid var(--purple)' : '1px solid var(--border-2)', borderRadius: 'var(--r-md)', padding: '18px 16px', cursor: 'pointer', background: selected === p.id ? 'rgba(139,92,246,0.08)' : 'transparent', transition: 'all 0.15s', boxShadow: selected === p.id ? 'var(--glow)' : 'none' }}
                 >
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{p.name}</div>
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 800, color: 'var(--purple-light)', marginBottom: 4 }}>{p.price}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--muted)' }}>/mo</span></div>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{p.name}</div>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 26, fontWeight: 800, color: 'var(--purple-light)', marginBottom: 4 }}>{p.price}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--muted)' }}>/mo</span></div>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>{p.desc}</div>
                 </div>
               ))}

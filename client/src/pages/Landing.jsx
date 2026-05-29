@@ -25,7 +25,7 @@ export default function Landing() {
       <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 48px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4, 3, 14, 0.7)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, boxShadow: 'var(--glow-wa)' }}>💬</div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, letterSpacing: '-0.02em' }}>LSWA</span>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 18, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {isLoggedIn
@@ -45,7 +45,7 @@ export default function Landing() {
           Now live — GHL Telephony Provider integration
         </div>
 
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 800, lineHeight: 1.05, maxWidth: 820, marginBottom: 24, letterSpacing: '-0.03em' }}>
+        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 800, lineHeight: 1.05, maxWidth: 820, marginBottom: 24, letterSpacing: '-0.03em' }}>
           Send WhatsApp from GHL —{' '}
           <span className="wa-text">looks like SMS_</span>
         </h1>
@@ -76,7 +76,7 @@ export default function Landing() {
 
       {/* Features */}
       <section style={{ padding: '80px 24px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>Everything you need</h2>
+        <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>Everything you need</h2>
         <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 16, marginBottom: 52 }}>Drop-in WhatsApp for GoHighLevel. No code, no Meta approvals.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
           {features.map(f => (
@@ -84,7 +84,7 @@ export default function Landing() {
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-hover)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-2)'; e.currentTarget.style.transform = 'none'; }}>
               <div style={{ width: 44, height: 44, borderRadius: 11, background: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 16 }}>{f.icon}</div>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.01em' }}>{f.title}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.01em' }}>{f.title}</div>
               <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.65 }}>{f.text}</div>
             </div>
           ))}
@@ -93,7 +93,7 @@ export default function Landing() {
 
       {/* How it works */}
       <section style={{ padding: '60px 24px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>How it works</h2>
+        <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>How it works</h2>
         <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 16, marginBottom: 52 }}>Three steps from sign-up to live WhatsApp delivery.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
@@ -102,9 +102,9 @@ export default function Landing() {
             { n: '03', title: 'Messages route automatically', desc: 'GHL sends SMS → LSWA intercepts → WhatsApp delivered. Replies come back into GHL.' },
           ].map(s => (
             <div key={s.n} className="glass-card" style={{ padding: '24px 28px', display: 'flex', alignItems: 'flex-start', gap: 20 }}>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 800, color: 'var(--purple-light)', letterSpacing: '0.05em', flexShrink: 0, marginTop: 3 }}>{s.n}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 800, color: 'var(--purple-light)', letterSpacing: '0.05em', flexShrink: 0, marginTop: 3 }}>{s.n}</div>
               <div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 5 }}>{s.title}</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15, marginBottom: 5 }}>{s.title}</div>
                 <div style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>{s.desc}</div>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function Landing() {
 
       {/* Pricing */}
       <section id="pricing" style={{ padding: '80px 24px', maxWidth: 1000, margin: '0 auto', width: '100%' }}>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>Simple pricing</h2>
+        <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 10, letterSpacing: '-0.02em' }}>Simple pricing</h2>
         <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 16, marginBottom: 52 }}>14-day free trial. No credit card required. Cancel anytime.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
           {plans.map(p => (
@@ -125,7 +125,7 @@ export default function Landing() {
                 </div>
               )}
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>{p.name}</div>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 2, background: p.popular ? 'var(--grad-text)' : 'none', WebkitBackgroundClip: p.popular ? 'text' : 'none', WebkitTextFillColor: p.popular ? 'transparent' : 'var(--text)', backgroundClip: p.popular ? 'text' : 'none' }}>{p.price}</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 2, background: p.popular ? 'var(--grad-text)' : 'none', WebkitBackgroundClip: p.popular ? 'text' : 'none', WebkitTextFillColor: p.popular ? 'transparent' : 'var(--text)', backgroundClip: p.popular ? 'text' : 'none' }}>{p.price}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 28 }}>{p.desc} per agency</div>
               <ul style={{ listStyle: 'none', marginBottom: 28 }}>
                 {p.features.map(f => (
@@ -146,7 +146,7 @@ export default function Landing() {
       <footer style={{ borderTop: '1px solid var(--border)', padding: '32px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>💬</div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15 }}>LSWA</span>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15 }}>LSWA</span>
         </div>
         <div style={{ color: 'var(--muted)', fontSize: 13 }}>© {new Date().getFullYear()} LeadSync. All rights reserved.</div>
         <div style={{ display: 'flex', gap: 20 }}>

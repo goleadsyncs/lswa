@@ -45,7 +45,7 @@ export default function Connect() {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div className="glass-card" style={{ padding: 52, maxWidth: 460, width: '100%', textAlign: 'center', animation: 'fadeIn 0.4s ease-out', boxShadow: 'var(--glow-wa)', borderColor: 'var(--wa-border)' }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--wa-glass)', border: '2px solid var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, margin: '0 auto 20px' }}>✓</div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, marginBottom: 10, letterSpacing: '-0.02em' }}>WhatsApp connected!</h2>
+          <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, marginBottom: 10, letterSpacing: '-0.02em' }}>WhatsApp connected!</h2>
           <p style={{ color: 'var(--muted)', fontSize: 15, lineHeight: 1.6, marginBottom: 28 }}>Your number is live and ready to receive GHL messages.</p>
           <button className="btn-wa" style={{ padding: '13px 32px', fontSize: 15 }} onClick={() => nav('/dashboard')}>Back to dashboard</button>
         </div>
@@ -64,7 +64,7 @@ export default function Connect() {
 
       <div className="glass-card" style={{ padding: 40, maxWidth: 460, width: '100%', textAlign: 'center' }}>
         <div style={{ width: 44, height: 44, borderRadius: 11, background: 'var(--wa-glass)', border: '1px solid var(--wa-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, margin: '0 auto 16px' }}>📱</div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>Connect WhatsApp</h2>
+        <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>Connect WhatsApp</h2>
         <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, marginBottom: 28 }}>Scan the QR code with your WhatsApp app to link this number to LSWA.</p>
 
         {/* QR Box */}

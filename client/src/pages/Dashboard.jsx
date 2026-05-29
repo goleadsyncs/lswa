@@ -58,7 +58,7 @@ export default function Dashboard() {
       <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)', background: 'rgba(4, 3, 14, 0.8)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--wa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>💬</div>
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em' }}>LSWA</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ color: 'var(--muted)', fontSize: 13, cursor: 'pointer' }} onClick={() => nav('/billing')}>Billing</span>
@@ -70,7 +70,7 @@ export default function Dashboard() {
 
         {/* Page title */}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Dashboard</h1>
+          <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Dashboard</h1>
           <p style={{ color: 'var(--muted)', fontSize: 14 }}>Manage your GHL connections and WhatsApp numbers</p>
         </div>
 
@@ -86,14 +86,14 @@ export default function Dashboard() {
           /* Empty state */
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
             <div style={{ fontSize: 52, marginBottom: 18 }}>🔗</div>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Connect your first GHL account</h2>
+            <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Connect your first GHL account</h2>
             <p style={{ color: 'var(--muted)', fontSize: 15, marginBottom: 28 }}>Link a GHL sub-account to start routing messages via WhatsApp.</p>
             <a href="/api/auth/ghl" className="btn-wa" style={{ padding: '13px 32px', fontSize: 15 }}>Connect GHL account</a>
           </div>
         ) : (
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-              <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text-2)' }}>GHL Sub-accounts <span style={{ color: 'var(--muted)', fontWeight: 400 }}>({locations.length})</span></h2>
+              <h2 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 600, color: 'var(--text-2)' }}>GHL Sub-accounts <span style={{ color: 'var(--muted)', fontWeight: 400 }}>({locations.length})</span></h2>
               <a href="/api/auth/ghl" className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}>+ Add account</a>
             </div>
 
@@ -105,7 +105,7 @@ export default function Dashboard() {
                     {/* Location header */}
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
                       <div>
-                        <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{loc.name || 'Unnamed account'}</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{loc.name || 'Unnamed account'}</div>
                         <div style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'monospace' }}>{loc.ghl_location_id}</div>
                       </div>
                       <span style={{ background: 'var(--wa-glass)', border: '1px solid var(--wa-border)', color: 'var(--wa)', padding: '3px 10px', borderRadius: 'var(--r-full)', fontSize: 12, fontWeight: 500 }}>Active</span>
