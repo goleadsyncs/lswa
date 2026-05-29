@@ -4,18 +4,17 @@ import { fireInboundTrigger } from '../routes/workflow.js';
 
 export function startInboundHandler() {
   waManager.on('inbound', async ({ sessionId, from, text }) => {
+    logger.info({ sessionId, from }, '[inbound] message received');
+
     try {
-      // 1. Resolve session → location
       const { data: session } = await supabase
         .from('wa_sessions')
         .select('location_id')
         .eq('id', sessionId)
         .single();
 
-      if (!session) {
-        logger.warn({ sessionId }, 'Inbound: session not found in DB');
-        return;
-      }
+      if (!session) { logger.warn({ sessionId }, '[inbound] session not in DB'); return; }
+      logger.info({ locationId: session.location_id }, '[inbound] session resolved');
 
       const { data: loc } = await supabase
         .from('ghl_locations')
@@ -23,39 +22,37 @@ export function startInboundHandler() {
         .eq('id', session.location_id)
         .single();
 
-      if (!loc) {
-        logger.warn({ sessionId }, 'Inbound: location not found');
-        return;
-      }
+      if (!loc) { logger.warn({ sessionId }, '[inbound] location not found'); return; }
+      logger.info({ ghlLocationId: loc.ghl_location_id }, '[inbound] location resolved');
 
-      // 2. Get a valid token
+      logger.info('[inbound] getting token');
       const companyToken = await ghlClient.ensureFreshToken(loc);
+      logger.info('[inbound] ensureFreshToken done');
+
       const locToken = await ghlClient.getLocationToken(companyToken, loc.ghl_location_id);
       const token = locToken || companyToken;
+      logger.info({ hasLocToken: !!locToken }, '[inbound] token ready');
 
-      // 3. Find or create GHL contact by phone
-      let contact = await ghlClient.findContactByPhone(token, loc.ghl_location_id, from);
-      const contactId = contact?.id || null;
+      logger.info({ from }, '[inbound] finding contact by phone');
+      const contact = await ghlClient.findContactByPhone(token, loc.ghl_location_id, from);
+      logger.info({ contactId: contact?.id }, '[inbound] contact lookup done');
 
-      // 4. Push message into GHL conversation (shows under LSWA channel)
+      logger.info('[inbound] calling injectInbound');
       await ghlClient.injectInbound({
         accessToken: token,
         locationId:  loc.ghl_location_id,
         fromPhone:   from,
-        toPhone:     null,
         message:     text,
-        type:        'Custom',
       });
+      logger.info('[inbound] injectInbound success');
 
-      // 5. Fire workflow trigger webhooks
       await fireInboundTrigger({
         locationId: loc.ghl_location_id,
-        contactId,
+        contactId:  contact?.id || null,
         phone:      from,
         message:    text,
       });
 
-      // 6. Log the message
       await supabase.from('message_logs').insert({
         location_id: loc.id,
         session_id:  sessionId,
@@ -66,7 +63,7 @@ export function startInboundHandler() {
         status:      'received',
       });
 
-      logger.info({ sessionId, from, locationId: loc.ghl_location_id }, 'Inbound WhatsApp message forwarded to GHL');
+      logger.info({ sessionId, from }, '[inbound] forwarded to GHL successfully');
     } catch (err) {
       const detail = err?.response?.data || err.message;
       logger.error({ err: detail, sessionId, from }, 'Failed to handle inbound WhatsApp message');
