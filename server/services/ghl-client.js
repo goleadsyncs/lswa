@@ -184,13 +184,24 @@ export class GHLClient {
    */
   getAuthUrl() {
     const scopes = [
+      'businesses.readonly',
       'conversations.readonly',
       'conversations.write',
       'conversations/message.readonly',
       'conversations/message.write',
       'contacts.readonly',
-      'locations/customValues.readonly',
+      'contacts.write',
       'locations.readonly',
+      'locations/customValues.readonly',
+      'locations/customValues.write',
+      'locations/customFields.readonly',
+      'locations/customFields.write',
+      'locations/tags.readonly',
+      'locations/tags.write',
+      'medias.readonly',
+      'medias.write',
+      'users.readonly',
+      'users.write',
     ].join(' ');
 
     const clientId  = process.env.GHL_CLIENT_ID; // e.g. 6a197451508d954be48f732c-mpqtubjl
