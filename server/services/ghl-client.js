@@ -127,22 +127,22 @@ export class GHLClient {
    * NOTE: The exact endpoint/payload may need adjustment based on your GHL app type.
    * Verify against: https://highlevel.stoplight.io/docs/integrations
    */
-  async injectInbound({ accessToken, locationId, fromPhone, toPhone, message }) {
+  async injectInbound({ accessToken, locationId, fromPhone, toPhone, message, type = 'Custom' }) {
     const digits = fromPhone.replace(/\D/g, '');
     const normalized = digits.startsWith('0') ? `+27${digits.slice(1)}` : `+${digits}`;
 
     await axios.post(
       `${GHL_BASE}/conversations/messages/inbound`,
       {
-        type:        'SMS',
+        type,
         phone:       normalized,
         message,
         attachments: [],
       },
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Version:       '2021-04-15',
+          Authorization:  `Bearer ${accessToken}`,
+          Version:        '2021-04-15',
           'Content-Type': 'application/json',
         },
         params: { locationId },
