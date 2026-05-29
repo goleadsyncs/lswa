@@ -185,6 +185,7 @@ export class GHLClient {
   getAuthUrl() {
     const scopes = [
       'businesses.readonly',
+      'campaigns.readonly',
       'conversations.readonly',
       'conversations.write',
       'conversations/message.readonly',
