@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import axios from 'axios';
 import supabase from '../lib/supabase.js';
-import { logger } from '../lib/instances.js';
+import { logger, waManager, ghlClient } from '../lib/instances.js';
 
 const router = Router();
 
@@ -75,5 +75,75 @@ export async function fireInboundTrigger({ locationId, contactId, phone, message
     }
   }
 }
+
+// ----------------------------------------------------------------
+// POST /api/workflow/action
+// GHL calls this when a user's workflow reaches the
+// "Send LSWA WhatsApp Message" action node.
+// ----------------------------------------------------------------
+router.post('/action', async (req, res) => {
+  logger.info({ body: req.body }, 'Workflow action received');
+
+  const locationId = req.body.locationId || req.body.location_id;
+  const contactId  = req.body.contactId  || req.body.contact_id;
+  const message    = req.body.customData?.message || req.body.message || req.body.body || '';
+
+  if (!locationId || !message) {
+    return res.status(400).json({ success: false, error: 'Missing locationId or message' });
+  }
+
+  try {
+    // Get location + token
+    const { data: loc } = await supabase
+      .from('ghl_locations')
+      .select('id, ghl_location_id, access_token, refresh_token, token_expires_at')
+      .eq('ghl_location_id', locationId)
+      .single();
+
+    if (!loc) return res.status(404).json({ success: false, error: 'Location not found' });
+
+    // Resolve contact phone
+    let toPhone = req.body.phone || req.body.contactPhone;
+    if (!toPhone && contactId) {
+      const companyToken = await ghlClient.ensureFreshToken(loc);
+      const locToken     = await ghlClient.getLocationToken(companyToken, locationId);
+      const contact      = await ghlClient.getContact(locToken || companyToken, contactId);
+      toPhone = contact?.phone;
+    }
+
+    if (!toPhone) return res.status(400).json({ success: false, error: 'Could not resolve contact phone' });
+
+    // Find active WhatsApp session for this location
+    const { data: session } = await supabase
+      .from('wa_sessions')
+      .select('id')
+      .eq('location_id', loc.id)
+      .eq('status', 'connected')
+      .limit(1)
+      .single();
+
+    if (!session) return res.status(503).json({ success: false, error: 'No active WhatsApp session' });
+
+    await waManager.sendMessage(session.id, toPhone, message);
+
+    // Log it
+    await supabase.from('message_logs').insert({
+      location_id: loc.id,
+      session_id:  session.id,
+      direction:   'outbound',
+      from_number: 'LSWA',
+      to_number:   toPhone,
+      body:        message,
+      status:      'sent',
+    });
+
+    logger.info({ locationId, contactId, toPhone }, 'Workflow action: WhatsApp sent');
+    res.json({ success: true });
+  } catch (err) {
+    const detail = err?.response?.data || err.message;
+    logger.error({ err: detail, locationId, contactId }, 'Workflow action failed');
+    res.status(500).json({ success: false, error: String(detail) });
+  }
+});
 
 export default router;
