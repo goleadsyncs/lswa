@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import supabase from '../lib/supabase.js';
-import { waManager, logger } from '../index.js';
+import { waManager, logger } from '../lib/instances.js';
 
 const router = Router();
 

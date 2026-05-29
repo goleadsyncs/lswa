@@ -1,23 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import pino from 'pino';
-import { WhatsAppManager } from './services/whatsapp-manager.js';
-import { GHLClient } from './services/ghl-client.js';
+import { logger, waManager, ghlClient } from './lib/instances.js';
 import supabase from './lib/supabase.js';
 import authRoutes from './routes/auth.js';
 import webhookRoutes from './routes/webhook.js';
 import whatsappRoutes from './routes/whatsapp.js';
 import billingRoutes from './routes/billing.js';
-
-export const logger = pino(
-  process.env.NODE_ENV === 'development'
-    ? { transport: { target: 'pino-pretty', options: { colorize: true } } }
-    : {}
-);
-
-export const waManager = new WhatsAppManager();
-export const ghlClient = new GHLClient();
 
 const app = express();
 
@@ -26,19 +15,18 @@ app.use(cors({
   credentials: true,
 }));
 
-// Stripe needs raw body — must be before express.json()
 app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
-app.use('/api/auth',      authRoutes);
-app.use('/api/ghl',       webhookRoutes);
-app.use('/api/whatsapp',  whatsappRoutes);
-app.use('/api/billing',   billingRoutes);
+app.use('/api/auth',     authRoutes);
+app.use('/api/ghl',      webhookRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/billing',  billingRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
 
-// Re-initialise all previously connected sessions on startup
 async function restoreSessions() {
+  if (!process.env.SUPABASE_URL) return;
   const { data: sessions } = await supabase
     .from('wa_sessions')
     .select('id, location_id, ghl_locations(ghl_location_id)')
@@ -49,15 +37,14 @@ async function restoreSessions() {
 
   for (const s of sessions) {
     const locationGhlId = s.ghl_locations?.ghl_location_id;
-    await waManager.createSession(s.id, locationGhlId, async (status, qr) => {
+    await waManager.createSession(s.id, locationGhlId, async (status) => {
       await supabase.from('wa_sessions').update({ status, updated_at: new Date() }).eq('id', s.id);
-      logger.info({ sessionId: s.id, status }, 'Session status update');
     });
   }
 }
 
-// Forward inbound WhatsApp messages to GHL
 waManager.on('inbound', async ({ sessionId, from, text }) => {
+  if (!process.env.SUPABASE_URL) return;
   try {
     const { data: mapping } = await supabase
       .from('wa_number_mappings')

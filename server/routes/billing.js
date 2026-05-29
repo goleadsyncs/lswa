@@ -2,7 +2,7 @@ import { Router } from 'express';
 import Stripe from 'stripe';
 import supabase from '../lib/supabase.js';
 import { requireAuth } from '../middleware/auth.js';
-import { logger } from '../index.js';
+import { logger } from '../lib/instances.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const router = Router();

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import supabase from '../lib/supabase.js';
 import { issueToken, requireAuth } from '../middleware/auth.js';
-import { ghlClient } from '../index.js';
+import { ghlClient } from '../lib/instances.js';
 
 const router = Router();
 
