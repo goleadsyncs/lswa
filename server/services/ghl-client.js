@@ -78,9 +78,15 @@ export class GHLClient {
    * Required for location-level API calls (contacts, conversations, etc.)
    */
   async getLocationToken(companyToken, locationId) {
+    // Decode JWT to extract companyId (authClassId field)
+    const jwtPayload = JSON.parse(
+      Buffer.from(companyToken.split('.')[1], 'base64url').toString('utf8')
+    );
+    const companyId = jwtPayload.authClassId || jwtPayload.primaryAuthClassId;
+
     const { data } = await axios.post(
       `${GHL_BASE}/oauth/locationToken`,
-      { locationId },
+      { companyId, locationId },
       {
         headers: {
           Authorization:  `Bearer ${companyToken}`,
