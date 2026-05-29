@@ -9,6 +9,10 @@ function verifySignature(req) {
   const secret = process.env.GHL_WEBHOOK_SECRET;
   if (!secret) return true;
   const sig = req.headers['x-ghl-signature'] || req.headers['x-webhook-signature'] || '';
+  if (!sig) {
+    logger.warn({ headers: Object.keys(req.headers) }, 'No signature header found - GHL headers received');
+    return true; // allow through so we can see what GHL sends
+  }
   const body = JSON.stringify(req.body);
   const expected = crypto.createHmac('sha256', secret).update(body).digest('hex');
   try { return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)); }
