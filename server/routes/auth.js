@@ -29,21 +29,33 @@ router.get('/callback', async (req, res) => {
       return res.status(500).send(`Token exchange failed: ${JSON.stringify(detail)}`);
     }
 
-    // Upsert user by GHL user id
+    console.log('GHL token response keys:', Object.keys(tokens));
+
+    // GHL v2 uses different field names — handle all variants
+    const ghlUserId   = tokens.userId   || tokens.user_id   || tokens.companyId || tokens.sub || 'unknown';
+    const ghlLocId    = tokens.locationId || tokens.location_id || locationId || req.query.location_id;
+    const userEmail   = tokens.email    || `${ghlUserId}@ghl.user`;
+
+    if (!ghlLocId) {
+      console.error('No locationId in token response or query params. Token keys:', Object.keys(tokens));
+      return res.status(500).send(`No location ID found. GHL returned: ${JSON.stringify(tokens)}`);
+    }
+
+    // Upsert user
     const { data: user } = await supabase
       .from('users')
       .upsert(
-        { ghl_user_id: tokens.userId, email: tokens.email || `${tokens.userId}@ghl.user` },
+        { ghl_user_id: ghlUserId, email: userEmail },
         { onConflict: 'ghl_user_id', ignoreDuplicates: false }
       )
       .select()
       .single();
 
-    // Upsert the connected location
-    const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
+    // Upsert location
+    const expiresAt = new Date(Date.now() + (tokens.expires_in || 86400) * 1000);
     await supabase.from('ghl_locations').upsert({
       user_id:          user.id,
-      ghl_location_id:  tokens.locationId || locationId,
+      ghl_location_id:  ghlLocId,
       access_token:     tokens.access_token,
       refresh_token:    tokens.refresh_token,
       token_expires_at: expiresAt.toISOString(),
@@ -51,13 +63,13 @@ router.get('/callback', async (req, res) => {
       updated_at:       new Date().toISOString(),
     }, { onConflict: 'ghl_location_id' });
 
-    // Fetch location name from GHL
+    // Fetch location name (non-critical)
     try {
-      const locData = await ghlClient.getLocation(tokens.access_token, tokens.locationId || locationId);
-      await supabase
-        .from('ghl_locations')
-        .update({ name: locData.location?.name })
-        .eq('ghl_location_id', tokens.locationId || locationId);
+      const locData = await ghlClient.getLocation(tokens.access_token, ghlLocId);
+      const locName = locData?.location?.name || locData?.name;
+      if (locName) {
+        await supabase.from('ghl_locations').update({ name: locName }).eq('ghl_location_id', ghlLocId);
+      }
     } catch { /* non-critical */ }
 
     const jwt = issueToken(user.id);
