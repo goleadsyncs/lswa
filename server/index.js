@@ -1,12 +1,18 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
 import { logger, waManager, ghlClient } from './lib/instances.js';
 import supabase from './lib/supabase.js';
 import authRoutes from './routes/auth.js';
 import webhookRoutes from './routes/webhook.js';
 import whatsappRoutes from './routes/whatsapp.js';
 import billingRoutes from './routes/billing.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const clientDist = join(__dirname, '..', 'client', 'dist');
 
 const app = express();
 
@@ -24,6 +30,12 @@ app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/billing',  billingRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
+
+// Serve built React client in production
+if (existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res) => res.sendFile(join(clientDist, 'index.html')));
+}
 
 async function restoreSessions() {
   if (!process.env.SUPABASE_URL) return;
