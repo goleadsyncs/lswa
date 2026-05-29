@@ -68,7 +68,8 @@ export function startInboundHandler() {
 
       logger.info({ sessionId, from, locationId: loc.ghl_location_id }, 'Inbound WhatsApp message forwarded to GHL');
     } catch (err) {
-      logger.error({ err: err.message, sessionId, from }, 'Failed to handle inbound WhatsApp message');
+      const detail = err?.response?.data || err.message;
+      logger.error({ err: detail, sessionId, from }, 'Failed to handle inbound WhatsApp message');
     }
   });
 

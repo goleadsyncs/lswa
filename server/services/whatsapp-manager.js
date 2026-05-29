@@ -96,7 +96,11 @@ export class WhatsAppManager extends EventEmitter {
 
   _handleInbound(sessionId, msg) {
     const jid = msg.key.remoteJid || '';
-    const from = jid.replace('@s.whatsapp.net', '').replace(/[^0-9+]/g, '');
+
+    // Only handle personal DMs — skip groups (@g.us), broadcasts, status
+    if (!jid.endsWith('@s.whatsapp.net')) return;
+
+    const from = jid.replace('@s.whatsapp.net', '');
     const text =
       msg.message?.conversation ||
       msg.message?.extendedTextMessage?.text ||

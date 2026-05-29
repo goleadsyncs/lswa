@@ -127,17 +127,47 @@ export class GHLClient {
    * NOTE: The exact endpoint/payload may need adjustment based on your GHL app type.
    * Verify against: https://highlevel.stoplight.io/docs/integrations
    */
-  async injectInbound({ accessToken, locationId, fromPhone, toPhone, message, type = 'Custom' }) {
+  async injectInbound({ accessToken, locationId, fromPhone, message }) {
     const digits = fromPhone.replace(/\D/g, '');
     const normalized = digits.startsWith('0') ? `+27${digits.slice(1)}` : `+${digits}`;
 
-    await axios.post(
-      `${GHL_BASE}/conversations/messages/inbound`,
+    // 1. Find or create the GHL contact
+    let contact = await this.findContactByPhone(accessToken, locationId, normalized);
+    if (!contact) {
+      const { data } = await axios.post(
+        `${GHL_BASE}/contacts/`,
+        { locationId, phone: normalized, source: 'WhatsApp' },
+        { headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-07-28', 'Content-Type': 'application/json' } }
+      );
+      contact = data?.contact || data;
+    }
+
+    // 2. Find or create the conversation for this contact
+    const { data: convSearch } = await axios.get(
+      `${GHL_BASE}/conversations/search`,
       {
-        type,
-        phone:       normalized,
+        headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-04-15' },
+        params: { locationId, contactId: contact.id, limit: 1 },
+      }
+    );
+    let conversationId = convSearch?.conversations?.[0]?.id;
+
+    if (!conversationId) {
+      const { data: newConv } = await axios.post(
+        `${GHL_BASE}/conversations/`,
+        { locationId, contactId: contact.id },
+        { headers: { Authorization: `Bearer ${accessToken}`, Version: '2021-04-15', 'Content-Type': 'application/json' } }
+      );
+      conversationId = newConv?.conversation?.id || newConv?.id;
+    }
+
+    // 3. Post the inbound message to the conversation
+    await axios.post(
+      `${GHL_BASE}/conversations/messages`,
+      {
+        type:           'WhatsApp',
+        conversationId,
         message,
-        attachments: [],
       },
       {
         headers: {
@@ -145,7 +175,6 @@ export class GHLClient {
           Version:        '2021-04-15',
           'Content-Type': 'application/json',
         },
-        params: { locationId },
       }
     );
   }
