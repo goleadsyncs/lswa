@@ -112,19 +112,22 @@ export class GHLClient {
    */
   getAuthUrl() {
     const scopes = [
+      'conversations.readonly',
+      'conversations.write',
       'conversations/message.readonly',
       'conversations/message.write',
       'contacts.readonly',
+      'locations/customValues.readonly',
       'locations.readonly',
     ].join(' ');
 
     const params = new URLSearchParams({
       response_type: 'code',
       redirect_uri:  process.env.GHL_REDIRECT_URI,
-      client_id:     process.env.GHL_CLIENT_ID,
       scope:         scopes,
+      version_id:    process.env.GHL_CLIENT_ID,
     });
 
-    return `https://marketplace.gohighlevel.com/oauth/chooselocation?${params}`;
+    return `https://marketplace.gohighlevel.com/v2/oauth/chooselocation?${params}`;
   }
 }
