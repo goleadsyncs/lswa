@@ -80,11 +80,11 @@ export class GHLClient {
   async getLocationToken(companyToken, locationId) {
     const { data } = await axios.post(
       `${GHL_BASE}/oauth/locationToken`,
-      new URLSearchParams({ companyId: '', locationId }),
+      { locationId },
       {
         headers: {
           Authorization:  `Bearer ${companyToken}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
           Version:        '2021-07-28',
         },
       }
